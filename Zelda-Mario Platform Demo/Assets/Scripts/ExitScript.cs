@@ -1,14 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ExitScript : MonoBehaviour {
 
 	public bool locked = true;
-	public string targetScene = "level1";
+	public string targetScene = "Level1";
 	ParticleSystem.MainModule main;
+	public GameObject dataMan;
 	// Use this for initialization
 	void Start () {
+		bool unlocked;
+		dataMan = GameObject.Find ("GameData");
+		if (dataMan.GetComponent<GameData> ().map.TryGetValue (SceneManager.GetActiveScene ().name, out unlocked)) {
+			locked = !unlocked;
+		}
 		main = this.gameObject.transform.GetChild (0).GetComponentInChildren<ParticleSystem> ().main;
 	}
 

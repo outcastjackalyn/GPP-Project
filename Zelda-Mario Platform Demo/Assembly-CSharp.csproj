@@ -65,6 +65,7 @@
      <Compile Include="Assets\Scripts\EnemyPatrolScript.cs" />
      <Compile Include="Assets\Scripts\EnemySlimeScript.cs" />
      <Compile Include="Assets\Scripts\ExitScript.cs" />
+     <Compile Include="Assets\Scripts\GameData.cs" />
      <Compile Include="Assets\Scripts\GearScript.cs" />
      <Compile Include="Assets\Scripts\PlatformScript.cs" />
      <Compile Include="Assets\Scripts\PlaySpaceScript.cs" />

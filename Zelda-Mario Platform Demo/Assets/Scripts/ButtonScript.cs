@@ -70,7 +70,6 @@ public class ButtonScript : MonoBehaviour {
         
         if (Player.GetComponent<CharacterController>().isInteracting)
         {
-            Debug.LogWarning("A warning assigned to this transform!", transform);
             if (!buttonStatus && playerInRange)
             {
                 StartCoroutine(this.cutscene());
