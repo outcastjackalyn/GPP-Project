@@ -5,9 +5,9 @@ using UnityEngine;
 public class GameData : MonoBehaviour {
 
 	public Dictionary <string, bool> map = new Dictionary<string,bool> ();
-	/*public bool a;
+	public bool a;
 	public bool b;
-	public bool c;*/
+	public bool c;
 
 
 	// Use this for initialization
@@ -23,7 +23,7 @@ public class GameData : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		//map.TryGetValue ("Level1", out a);
+		map.TryGetValue ("Level1", out a);
 	}
 
 

@@ -17,15 +17,15 @@ public struct SlimeData {
 		this.type = type;
 		this.size = size;
 		switch (type) {
-		case SlimeType.BLUE:
+		case SlimeType.BLUE: // is okay for up to maybe size 5?
 			this.scale = 1.0f;
 			this.moveSpeed = size > 1 ? 2f : 1.5f;
 			this.split = size > 1 ? 2 : 0;
 			break;
-		case SlimeType.RED:
-			this.scale = size > 1 ? 3.0f : 0.6f;
+		case SlimeType.RED://best to have max size 2
+			this.scale = size > 1 ? 2.0f : 0.75f;
 			this.split = size > 1 ? 8 : 0;
-			this.moveSpeed = size > 1 ? 0.7f : 1.3f;
+			this.moveSpeed = size > 1 ? 1.4f : 2.3f;
 			break;
 		default:
 			this.scale = 1.0f;
@@ -51,6 +51,7 @@ public class SlimeSpawnerScript : MonoBehaviour {
 	public int repeat = -1;
 	// Use this for initialization
 	void Start () {
+		
 		//slime = GameObject.Find ("Slime");
 		if (spawnType != SpawnType.SINGLE) {
 			GameObject newBody;

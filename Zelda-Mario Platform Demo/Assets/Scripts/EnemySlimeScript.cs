@@ -6,6 +6,10 @@ using UnityEngine;
 
 public class EnemySlimeScript : MonoBehaviour {
 
+	public Material baseMat;
+	public Material damagedMat;
+	public Material angryMat;
+
 	private GameObject Player;
 	public SlimeData data;
 	public int health = 0;
@@ -38,16 +42,23 @@ public class EnemySlimeScript : MonoBehaviour {
 	//Actions
 	public bool isHit = false;
 	public bool isAttacking = false;
+	public bool isRetreating = false;
+	public float attackRange = 1f;
 	public bool isDead = false;
+	public int jumpSinceAttack = 0;
 
 	// Use this for initialization
 	void Start () {
+		baseMat = this.gameObject.transform.GetChild (0).GetComponent<MeshRenderer> ().material;
 		state = PatrolState.AGGRO;
 		isHit = false;
-		immuneTimer = 3f;
+		isAttacking = false;
+		isRetreating = false;
+		immuneTimer = 1.5f;
 		health = data.size;
 		speed = data.moveSpeed;
 		target = transform;
+		attackRange = speed * data.size * data.scale + 1f;
 		Player = GameObject.Find("Player");
 		this.gameObject.transform.GetChild (5).GetComponent<ParticleSystem> ().collision.SetPlane (0, GameObject.Find ("BouncePlane").transform);
 		this.gameObject.transform.GetChild (4).GetComponent<ParticleSystem> ().collision.SetPlane (0, GameObject.Find ("BouncePlane").transform);
@@ -68,14 +79,16 @@ public class EnemySlimeScript : MonoBehaviour {
 			break;
 		};
 
-		if (immuneTimer > 0) {
+		if (immuneTimer > 0f) {
 			immuneTimer -= Time.deltaTime;
 			isHit = false;
-			int i = (int) (immuneTimer * 10);
+			int i = (int)(immuneTimer * 10);
 			if (i % 3 == 0) {
 				damaged = true;
 			}
-			//put immuinity animation here :)
+		} else if (isAttacking) {
+			isHit = false;
+			//is also immune Touch damage during it's attack
 		}
 		else if (isHit) {
 			this.gameObject.transform.GetChild(5).LookAt (GameObject.Find("B_Head").GetComponent<Transform>());
@@ -86,20 +99,24 @@ public class EnemySlimeScript : MonoBehaviour {
 				
 				StartCoroutine (die ());
 			}
-			immuneTimer = 2f;
+			immuneTimer = 1.5f;
 			isHit = false;
 		}
 
 		if(velocity.magnitude > 0.1f) {
 			transform.position += new Vector3 (velocity.x * Time.deltaTime, velocity.y * Time.deltaTime, velocity.z * Time.deltaTime);
 		}
+
 		if (damaged) {
-			
-			this.gameObject.transform.GetChild (0).GetComponent<MeshRenderer> ().material.SetColor ("_Color", new Color (0.8113f, 0.6647f, 0f, 0.4f));
+			//this.gameObject.transform.GetChild (0).GetComponent<MeshRenderer> ().material.SetColor ("_Color", new Color (0.8113f, 0.6647f, 0f, 0.4f));
+			this.gameObject.transform.GetChild (0).GetComponent<MeshRenderer> ().material = damagedMat;
+		} else if (isAttacking) {
+			this.gameObject.transform.GetChild (0).GetComponent<MeshRenderer> ().material = angryMat;
 		} else {
-			this.gameObject.transform.GetChild (0).GetComponent<MeshRenderer> ().material.SetColor ("_Color", new Color (0.0745f, 0.9019f, 0.9333f, 0.4f));	
+			this.gameObject.transform.GetChild (0).GetComponent<MeshRenderer> ().material = baseMat;	
 		}
 		Jumping();
+
 	}
 
 	void FixedUpdate(){
@@ -108,8 +125,8 @@ public class EnemySlimeScript : MonoBehaviour {
 		//rb.AddForce(0, gravity, 0, ForceMode.Acceleration);
 		if(!isGrounded) {
 			velocity.y += gravity * Time.deltaTime;
-		} else if( velocity.y < 0) {
-			velocity.y = 0;
+		} else if( velocity.y < 0f) {
+			velocity.y = 0f;
 		}
 
 		//Check if character can move.
@@ -139,10 +156,10 @@ public class EnemySlimeScript : MonoBehaviour {
 		}
 		RaycastHit hit;
 		//RaycastHit hit2;
-		Vector3 offset = new Vector3(0, -0.51f * transform.localScale.y, 0);
+		Vector3 offset = new Vector3(0f, -0.51f * transform.localScale.y, 0f);
 		if(Physics.Raycast((transform.position + offset), -Vector3.up, out hit, 100f)) {
 			distanceToGround = hit.distance;
-			if (distanceToGround < slopeAmount * 5) {
+			if (distanceToGround < slopeAmount * 5f) {
 				velocity.y *= velocity.y < 0f ? 0.9f : 1f;
 			}
 			if (distanceToGround < slopeAmount) {
@@ -172,19 +189,51 @@ public class EnemySlimeScript : MonoBehaviour {
 				Time.deltaTime * rotationSpeed
 			);
 			//transform.LookAt (new Vector3 (target.position.x, 0, target.position.z));
-			if(canJump && !isJumping) {
-				StartCoroutine(_Jump());
+
+			if(canJump && !isJumping && !isAttacking && !isRetreating && immuneTimer <= 0f) {
+				if ((target.position - transform.position).magnitude < attackRange && jumpSinceAttack > 2) {
+					StartCoroutine (Attack ());
+				} else {
+					StartCoroutine (Jump ());
+				}
 			}
 		}
 	}
 
-	public IEnumerator _Jump() {
+
+	public IEnumerator Attack() {
+		jumpSinceAttack = 0;
+		isJumping = true;
+		isAttacking = true;
+		yield return new WaitForSeconds(0.6f);
+		//Apply the current movement to launch velocity.
+		Vector3 attackDir = (target.position - transform.position);
+		velocity += speed * new Vector3(0f, 4f, 0f);
+		velocity += speed * (attackDir.magnitude > attackDir.normalized.magnitude ? attackDir : attackDir.normalized) * 0.9f;
+		//velocity += speed * (Player.transform.position - transform.position);
+		yield return new WaitForSeconds(0.2f);
+		isRetreating = true;
+		while (!isGrounded) {
+			yield return null;
+		}
+		isAttacking = false;
+		jumpSinceAttack ++;
+		velocity += speed * new Vector3(0f, 2f, 0f);
+		velocity -= speed * attackDir.normalized ;
+		yield return new WaitForSeconds(1f);
+		isJumping = false;
+		isRetreating = false;
+	}
+
+
+	public IEnumerator Jump() {
+		jumpSinceAttack ++;
 		isJumping = true;
 		//Apply the current movement to launch velocity.
 		velocity += speed * new Vector3(0f, 3f, 0f);
 		velocity += speed * (target.position - transform.position).normalized;
 		//velocity += speed * (Player.transform.position - transform.position);
-		yield return new WaitForSeconds(2f);
+		yield return new WaitForSeconds((target.position - transform.position).magnitude > attackRange ? 2f : 0.5f);
 		isJumping = false;
 	}
 
@@ -212,7 +261,6 @@ public class EnemySlimeScript : MonoBehaviour {
 
 	public IEnumerator die()
 	{
-
 		for (int i = 0; i < data.split; i++) {
 			StartCoroutine (gameObject.GetComponentInChildren<SlimeSpawnerScript> ().spawn (new SlimeData (data.type, (data.size - 1))));
 		}

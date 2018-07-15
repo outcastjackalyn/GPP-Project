@@ -4,37 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class ExitScript : MonoBehaviour {
-
-	public bool locked = true;
-	public string targetScene = "Level1";
-	public GameObject dataMan;
-	ParticleSystem.MainModule main;
-	// Use this for initialization
-	void Start () {
-		bool unlocked;
-		dataMan = GameObject.Find ("GameData");
-		if (dataMan.GetComponent<GameData> ().map.TryGetValue (SceneManager.GetActiveScene ().name, out unlocked)) {
-			locked = !unlocked;
-		}
-		main = this.gameObject.transform.GetChild (0).GetComponentInChildren<ParticleSystem> ().main;
-	}
-
-	// Update is called once per frame
-	void Update () {
-		if (locked) {
-			this.gameObject.transform.GetChild (0).GetComponent<MeshRenderer> ().material.SetColor ("_Color", new Color (0.9755f, 1.0f, 0.4481f, 1f));
-			main.startColor = new Color (0.9755f, 1.0f, 0.4481f, 1f);
-		} else {
-			this.gameObject.transform.GetChild (0).GetComponent<MeshRenderer> ().material.SetColor ("_Color", new Color (0.6412f, 0.2133f, 0.9622f, 1.0f));	
-			main.startColor = new Color (0.6412f, 0.2133f, 0.9622f, 1.0f);
-		}
-	}
-
-
-}
-
-
 //Script requires Rigidbody and NavMeshAgent components.
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(UnityEngine.AI.NavMeshAgent))]
@@ -108,7 +77,8 @@ public class CharacterController : MonoBehaviour{
 	bool isKnockback;
 	public bool isAttacking = false;
 	public bool isInteracting = false;
-	public int health = 0;
+	public int health = 5;
+	public float immuneTimer = 0f;
 
     //Input variables.
     float inputHorizontal = 0f;
@@ -264,6 +234,9 @@ public class CharacterController : MonoBehaviour{
 			default:
 				break;
 			}
+		}
+		if (immuneTimer > 0) {
+			immuneTimer -= Time.deltaTime;
 		}
 		if (boostTimer > 0) {
 			boostTimer -= Time.deltaTime;
@@ -646,10 +619,22 @@ public class CharacterController : MonoBehaviour{
 
 	void OnTriggerEnter(Collider c)
 	{
-		if (isAttacking) {
-			if (c.gameObject.tag == "Enemy") {
+		if (c.gameObject.tag == "Enemy") {
+			if (c.gameObject.GetComponent<EnemySlimeScript> ().isAttacking) {
+				if (immuneTimer <= 0f) {
+					if (health > 1) {
+						GetHit ();
+						health--;
+						immuneTimer = 1.5f;
+					} else {
+						string scene = SceneManager.GetActiveScene ().name;
+						//SceneManager.UnloadSceneAsync (scene);
+						StartCoroutine (nextLevel (null, scene));
+					}
+				}
+			} else if (isAttacking) {
 				c.gameObject.GetComponent<EnemySlimeScript> ().isHit = true;
-			}
+			} 
 		}
 
 		if (c.gameObject.tag == "Platform") {

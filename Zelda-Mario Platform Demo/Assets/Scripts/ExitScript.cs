@@ -9,6 +9,7 @@ public class ExitScript : MonoBehaviour {
 	public string targetScene = "Level1";
 	ParticleSystem.MainModule main;
 	public GameObject dataMan;
+
 	// Use this for initialization
 	void Start () {
 		bool unlocked;
