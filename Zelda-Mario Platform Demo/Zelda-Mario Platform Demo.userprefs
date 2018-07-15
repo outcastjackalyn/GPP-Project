@@ -1,0 +1,25 @@
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\SplineScript.cs">
+    <Files>
+      <File FileName="Assets\Scripts\ButtonScript.cs" Line="165" Column="59" />
+      <File FileName="Assets\Scripts\DoorScript.cs" Line="32" Column="10" />
+      <File FileName="Assets\Scripts\CharacterController.cs" Line="609" Column="38" />
+      <File FileName="Assets\Scripts\CameraController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\PlaySpaceScript.cs" Line="13" Column="3" />
+      <File FileName="Assets\Scripts\EnemyPatrolScript.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\EnemySlimeScript.cs" Line="96" Column="3" />
+      <File FileName="Assets\Scripts\SlimeSpawnerScript.cs" Line="56" Column="23" />
+      <File FileName="Assets\Scripts\CollectibleScript.cs" Line="37" Column="24" />
+      <File FileName="Assets\Scripts\CollectibleSpawnerScript.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\SplineScript.cs" Line="30" Column="21" />
+      <File FileName="Assets\Scripts\ExitScript.cs" Line="13" Column="3" />
+      <File FileName="Assets\Scripts\PlatformScript.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\GearScript.cs" Line="1" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
