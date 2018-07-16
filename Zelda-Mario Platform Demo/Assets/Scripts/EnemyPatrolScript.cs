@@ -21,9 +21,9 @@ public class EnemyPatrolScript : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		next = Instantiate (tracking);
-		spline = new Spline(SplineType.FOLLOW, new Vector3[2]);
-		spline.points.SetValue (end1, 0);
-		spline.points.SetValue (end2, 1);
+		spline = new Spline(SplineType.PATROL, new List<Vector3>());
+		spline.points.Add (end1);
+		spline.points.Add (end2);
 		next.transform.position = end1;
 	}
 	

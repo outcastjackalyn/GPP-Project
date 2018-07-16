@@ -72,14 +72,14 @@ public class ButtonScript : MonoBehaviour {
         {
             if (!buttonStatus && playerInRange)
             {
-                StartCoroutine(this.cutscene());
+                StartCoroutine(this._Cutscene());
 
             }
         }
         
     }
 
-    public IEnumerator pressButton()
+    public IEnumerator _PressButton()
     {
         buttonStatus = true;
 
@@ -125,11 +125,12 @@ public class ButtonScript : MonoBehaviour {
         }
     }
 
-    public IEnumerator cutscene()
+    public IEnumerator _Cutscene()
 	{
 		Player.GetComponent<Transform>().rotation = this.transform.rotation;
 		Player.GetComponent<Transform>().Rotate(0, -90, 0);
 		Player.GetComponent<Transform>().position = this.transform.position + new Vector3(0f,-1.5f,0f) + this.transform.right * 0.4f;
+		StartCoroutine (Player.GetComponent<CharacterController> ()._LockMovement (0f));
         MainCamera.enabled = false; SceneCamera.enabled = true;
 
         float timer = 0f;
@@ -138,10 +139,10 @@ public class ButtonScript : MonoBehaviour {
             timer += Time.deltaTime;
             yield return null;
         }
-        StartCoroutine(this.pressButton());
+        StartCoroutine(this._PressButton());
 
         timer = 0f;
-        while (timer < clickPauseTime/2)
+        while (timer < clickPauseTime / 2f)
         {
             timer += Time.deltaTime;
             yield return null;
@@ -160,7 +161,7 @@ public class ButtonScript : MonoBehaviour {
             // Move our position a step closer to the target.
             SceneCamera.GetComponent<Transform>().rotation = Quaternion.LookRotation(newDir);
             timer += Time.deltaTime;
-			if (!begin && timer > .5f) {
+			if (!begin && timer > 0.5f) {
 				DoorObject.GetComponent<DoorScript>().buttonGo = true;
 				begin = true;
 			}
@@ -174,6 +175,7 @@ public class ButtonScript : MonoBehaviour {
             yield return null;
         }
 		MainCamera.enabled = true; SceneCamera.enabled = false;
+		StartCoroutine (Player.GetComponent<CharacterController> ()._UnlockMovement ());
 		SceneCamera.gameObject.GetComponent<Transform>().LookAt(BodyTrans);
 
         buttonStatus = false;

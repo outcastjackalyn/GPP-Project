@@ -1,22 +1,22 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\EnemySlimeScript.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\CameraController.cs">
     <Files>
-      <File FileName="Assets\Scripts\ButtonScript.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\DoorScript.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\CharacterController.cs" Line="628" Column="25" />
-      <File FileName="Assets\Scripts\CameraController.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\PlaySpaceScript.cs" Line="16" Column="18" />
+      <File FileName="Assets\Scripts\ButtonScript.cs" Line="160" Column="13" />
+      <File FileName="Assets\Scripts\DoorScript.cs" Line="17" Column="28" />
+      <File FileName="Assets\Scripts\CharacterController.cs" Line="647" Column="2" />
+      <File FileName="Assets\Scripts\CameraController.cs" Line="54" Column="47" />
+      <File FileName="Assets\Scripts\PlaySpaceScript.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\EnemyPatrolScript.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\EnemySlimeScript.cs" Line="219" Column="23" />
-      <File FileName="Assets\Scripts\SlimeSpawnerScript.cs" Line="24" Column="10" />
+      <File FileName="Assets\Scripts\EnemySlimeScript.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\SlimeSpawnerScript.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\CollectibleScript.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\CollectibleSpawnerScript.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\SplineScript.cs" Line="28" Column="1" />
-      <File FileName="Assets\Scripts\ExitScript.cs" Line="9" Column="39" />
+      <File FileName="Assets\Scripts\ExitScript.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\PlatformScript.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\GearScript.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\GameData.cs" Line="26" Column="37" />
+      <File FileName="Assets\Scripts\GameData.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\SplineScript.cs" Line="1" Column="26" />
+      <File FileName="Assets\Scripts\CameraSplineScript.cs" Line="29" Column="4" />
+      <File FileName="Assets\Scripts\TerrainSplineScript.cs" Line="40" Column="44" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

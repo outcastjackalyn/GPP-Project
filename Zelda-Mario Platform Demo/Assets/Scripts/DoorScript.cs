@@ -24,15 +24,15 @@ public class DoorScript : MonoBehaviour {
         {
             if (doorStatus)
             { //close door
-                StartCoroutine(this.moveDoor(Quaternion.Euler(0, closedAngle, 0)));
+                StartCoroutine(this._MoveDoor(Quaternion.Euler(0, closedAngle, 0)));
             }
             else { //open door
-                StartCoroutine(this.moveDoor(Quaternion.Euler(0, openAngle, 0)));
+                StartCoroutine(this._MoveDoor(Quaternion.Euler(0, openAngle, 0)));
             }
         }
     }
 
-    public IEnumerator moveDoor(Quaternion dest)
+    public IEnumerator _MoveDoor(Quaternion dest)
     {
         doorMoving = true;
         //Check if close/open, if angle less 4 degree, or use another value more 0

@@ -18,6 +18,7 @@ public class CharacterController : MonoBehaviour{
 	[HideInInspector]
 	public Vector3 targetDashDirection;
 	public Camera sceneCamera;
+	public Mode mode;
 	private UnityEngine.AI.NavMeshAgent agent;
 	public GameObject key;
 
@@ -73,7 +74,7 @@ public class CharacterController : MonoBehaviour{
 	public bool isStrafing = false;
 	[HideInInspector]
 	public bool isDead = false;
-	public float knockbackMultiplier = 1f;
+	public float knockbackMultiplier = 1.5f;
 	bool isKnockback;
 	public bool isAttacking = false;
 	public bool isInteracting = false;
@@ -327,6 +328,23 @@ public class CharacterController : MonoBehaviour{
 		inputVec = inputHorizontal * right + inputVertical * forward;
 	}
 
+
+	/// <summary>
+	/// Movement based in a 2.5D plane.
+	/// </summary>
+	void RailRelativeMovement(){
+		//converts control input vectors into camera facing vectors.
+		Transform cameraTransform = sceneCamera.transform;
+		//Forward vector relative to the camera along the x-z plane.
+		Vector3 forward = cameraTransform.TransformDirection(Vector3.forward);
+		forward.y = 0;
+		forward = forward.normalized;
+		//Right vector relative to the camera always orthogonal to the forward vector.
+		Vector3 right = new Vector3(forward.z, 0, -forward.x);
+		inputVec = inputHorizontal * right;
+	}
+
+
 	/// <summary>
 	/// Rotate character towards movement direction.
 	/// </summary>
@@ -342,7 +360,14 @@ public class CharacterController : MonoBehaviour{
 	/// <returns>The movement.</returns>
 	float UpdateMovement(){
 		if(!useNavMesh){
-			CameraRelativeMovement();
+			mode = sceneCamera.gameObject.GetComponent<CameraController> ().mode;
+			if (mode == Mode.FOLLOW) {
+				CameraRelativeMovement ();
+			} else if (mode == Mode.SPLINE) {
+				RailRelativeMovement ();
+			} else {
+				CameraRelativeMovement (); // this can be default
+			}
 		}
 		Vector3 motion = inputVec;
 		//Reduce input for diagonal movement.
@@ -503,7 +528,7 @@ public class CharacterController : MonoBehaviour{
 		if (canAction && isGrounded) {
 			isInteracting = true;
 			animator.SetInteger("Action", 3);
-			StartCoroutine (_LockMovementAndAct (0, .75f));
+			StartCoroutine (_LockMovementForTime (0, .75f));
 			animator.SetTrigger("AttackTrigger");
         }
 	}
@@ -513,7 +538,7 @@ public class CharacterController : MonoBehaviour{
 			isAttacking = true;
 			animator.SetInteger("Action", kickSide);
 			animator.SetTrigger("AttackKickTrigger");
-			StartCoroutine(_LockMovementAndAct(0, .8f));
+			StartCoroutine(_LockMovementForTime(0, .8f));
 		}
 	}
 
@@ -522,7 +547,7 @@ public class CharacterController : MonoBehaviour{
 		int hitNumber = Random.Range(1, hits + 1);
 		animator.SetInteger("Action", hitNumber);
 		animator.SetTrigger("GetHitTrigger");
-		StartCoroutine(_LockMovementAndAct(.1f, .4f));
+		StartCoroutine(_LockMovementForTime(.1f, .4f));
 		//Apply directional knockback force.
 		if(hitNumber <= 2){
 			StartCoroutine(_Knockback(-transform.forward, 8, 4));
@@ -559,7 +584,7 @@ public class CharacterController : MonoBehaviour{
 	public void Death(){
 		animator.SetInteger("Action", 1);
 		animator.SetTrigger("DeathTrigger");
-		StartCoroutine(_LockMovementAndAct(.1f, 1.5f));
+		StartCoroutine(_LockMovementForTime(.1f, 1.5f));
 		isDead = true;
 		animator.SetBool("Moving", false);
 		inputVec = new Vector3(0, 0, 0);
@@ -571,8 +596,8 @@ public class CharacterController : MonoBehaviour{
 		isDead = false;
 	}
 
-	//Kkeep character from moveing while attacking, etc.
-	public IEnumerator _LockMovementAndAct(float delayTime, float lockTime){
+	//Keep character from moveing while attacking, etc.
+	public IEnumerator _LockMovementForTime(float delayTime, float lockTime){
 		yield return new WaitForSeconds(delayTime);
 		canAction = false;
 		canMove = false;
@@ -589,31 +614,46 @@ public class CharacterController : MonoBehaviour{
         animator.applyRootMotion = false;
 	}
 
-	//Placeholder functions for Animation events.
-	public void Hit(){
+
+
+	//Keep character from moveing while attacking, etc.
+	public IEnumerator _LockMovement(float delayTime){
+		yield return new WaitForSeconds(delayTime);
+		canAction = false;
+		canMove = false;
+		animator.SetBool("Moving", false);
+		rb.velocity = Vector3.zero;
+		rb.angularVelocity = Vector3.zero;
+		inputVec = new Vector3(0, 0, 0);
+		animator.applyRootMotion = true;
 	}
 
-	public void Shoot(){
-	}
-
-	public void FootR(){
-	}
-
-	public void FootL(){
-	}
-
-	public void Land(){
-	}
-
-	public void Jump(){
+	public IEnumerator _UnlockMovement(){
+		canAction = true;
+		canMove = true;
+		isAttacking = false;
+		isInteracting = false;
+		animator.applyRootMotion = false;
+		yield return true;
 	}
 
 	#endregion
 
-	public IEnumerator nextLevel(GameObject obj, string name) {
+	public IEnumerator _NextLevel(GameObject obj, string name) {
 		// do teleport animation i guess?
 		SceneManager.LoadSceneAsync(name);
 		yield return null;
+	}
+
+	public IEnumerator _AlignToRail(Vector3 pos) {
+		//StartCoroutine (_LockMovement(0f));
+		while (pos.x - transform.position.x  > 0f || pos.z - transform.position.z > 0f) {
+			Vector3 flatPos = Vector3.MoveTowards (transform.position, pos, 0.5f * Time.deltaTime);
+			flatPos.y = 0f;
+			rb.MovePosition (flatPos);
+			yield return null;
+		}
+		//StartCoroutine (_UnlockMovement ());
 	}
 
 
@@ -629,7 +669,7 @@ public class CharacterController : MonoBehaviour{
 					} else {
 						string scene = SceneManager.GetActiveScene ().name;
 						//SceneManager.UnloadSceneAsync (scene);
-						StartCoroutine (nextLevel (null, scene));
+						StartCoroutine (_NextLevel (null, scene));
 					}
 				}
 			} else if (isAttacking) {
@@ -654,9 +694,31 @@ public class CharacterController : MonoBehaviour{
 
 				}
 			} else {
-				StartCoroutine (nextLevel (key, c.gameObject.GetComponent<ExitScript>().targetScene));
+				StartCoroutine (_NextLevel (key, c.gameObject.GetComponent<ExitScript>().targetScene));
 			}
 		}
+
+
+		if (c.gameObject.tag == "RailCorner") {
+			sceneCamera.gameObject.GetComponent<CameraController> ().newCorner = c.transform.position;
+			sceneCamera.gameObject.GetComponent<CameraController> ().mode = Mode.SPLINE;
+
+
+			//transform.parent = c.transform;
+		}
+
+		if (c.gameObject.tag == "RailEnd") {
+			if (mode != Mode.FOLLOW) {
+				StartCoroutine (_AlignToRail (c.transform.position));
+			}
+			sceneCamera.gameObject.GetComponent<CameraController> ().newCorner = c.transform.position;
+			sceneCamera.gameObject.GetComponent<CameraController> ().mode = Mode.SPLINE;
+
+			//transform.parent = c.transform;
+		}
+
+
+
 	}
 
 	void OnTriggerExit(Collider c)
@@ -666,6 +728,17 @@ public class CharacterController : MonoBehaviour{
 				transform.parent = null;
 			}
 		}
+
+		if (c.gameObject.tag == "RailCorner") {
+			sceneCamera.gameObject.GetComponent<CameraController> ().newCorner = c.transform.position;
+			sceneCamera.gameObject.GetComponent<CameraController> ().mode = Mode.SPLINE;
+		}
+
+		if (c.gameObject.tag == "RailEnd") {
+			sceneCamera.gameObject.GetComponent<CameraController> ().newCorner = c.transform.position;
+			sceneCamera.gameObject.GetComponent<CameraController> ().mode = Mode.SPLINE;
+		}
+
 	}
 
 	void getTarget() {

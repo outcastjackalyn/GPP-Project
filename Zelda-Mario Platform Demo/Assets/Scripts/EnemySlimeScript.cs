@@ -208,19 +208,31 @@ public class EnemySlimeScript : MonoBehaviour {
 		yield return new WaitForSeconds(0.6f);
 		//Apply the current movement to launch velocity.
 		Vector3 attackDir = (target.position - transform.position);
-		velocity += speed * new Vector3(0f, 4f, 0f);
+		velocity += speed * new Vector3(0f, 4f, 0f); //ATTACK!!
 		velocity += speed * (attackDir.magnitude > attackDir.normalized.magnitude ? attackDir : attackDir.normalized) * 0.9f;
 		//velocity += speed * (Player.transform.position - transform.position);
 		yield return new WaitForSeconds(0.2f);
 		isRetreating = true;
-		while (!isGrounded) {
+		while (!isGrounded) { //retreat the direction it came
 			yield return null;
 		}
 		isAttacking = false;
 		jumpSinceAttack ++;
 		velocity += speed * new Vector3(0f, 2f, 0f);
 		velocity -= speed * attackDir.normalized ;
-		yield return new WaitForSeconds(1f);
+		yield return new WaitForSeconds(0.5f);
+		while (!isGrounded) { //retreat from player
+			yield return null;
+		}
+		yield return new WaitForSeconds(0.2f); //allow time to rotate a bit
+		isAttacking = false;
+		jumpSinceAttack ++;
+		velocity += speed * new Vector3(0f, 2f, 0f);
+		velocity -= speed * (target.position - transform.position).normalized ;
+		yield return new WaitForSeconds(0.2f);
+		while (!isGrounded) { //set to not retreating or jumping so it can jump or attack again
+			yield return null;
+		}
 		isJumping = false;
 		isRetreating = false;
 	}
