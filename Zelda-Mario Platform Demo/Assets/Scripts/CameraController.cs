@@ -66,6 +66,38 @@ public class CameraController : MonoBehaviour
 			transform.LookAt (cameraTarget.transform.position);
 			break;
 		case Mode.SPLINE:
+			if (newCorner != null)
+			{
+				if (newCorner != lastCorner)
+				{
+					lastCorner = newCorner;
+					nextCorner = findNext();
+					//cameraTarget.transform.position = newCorner;
+					//new Vector3 (lastRotation.x, , 0f);
+					//transform.RotateAround(cameraTarget.transform.position, Vector3.up, 4f);
+				}
+			}
+			double xdiff = (nextCorner.x - newCorner.x);
+			double zdiff = (nextCorner.z - newCorner.z);
+			double pxdiff = (cameraTarget.transform.position.x - newCorner.x);
+			double pzdiff = (cameraTarget.transform.position.z - newCorner.z);
+			double angle = System.Math.Atan((nextCorner.x - newCorner.x)/(nextCorner.z - newCorner.z));
+			double prop = System.Math.Sqrt(System.Math.Pow(pxdiff,2) + System.Math.Pow(pzdiff, 2))/ System.Math.Sqrt(System.Math.Pow(xdiff, 2) + System.Math.Pow(zdiff, 2));
+			cameraTarget.transform.LookAt(nextCorner);
+			transform.LookAt(new Vector3(newCorner.x + (float)(prop * xdiff), newCorner.y, newCorner.z + (float)(prop * zdiff)));
+			//transform.position = new Vector3(Mathf.Lerp(lastPosition.x, newCorner.x + offsetHeight * (float)System.Math.Cos(angle) + (float)pxdiff, smoothing * Time.deltaTime),
+			//Mathf.Lerp(lastPosition.y, newCorner.y + offsetHeight, smoothing * Time.deltaTime * 3),
+			//Mathf.Lerp(lastPosition.z, newCorner.z + offsetHeight * (float)System.Math.Sin(angle) + (float)pzdiff, smoothing * Time.deltaTime));
+			transform.position = new Vector3(Mathf.Lerp(lastPosition.x, cameraTarget.transform.position.x + offsetHeight * (float)System.Math.Cos(angle), smoothing * Time.deltaTime),
+				Mathf.Lerp(lastPosition.y, cameraTarget.transform.position.y + offsetHeight, smoothing * Time.deltaTime * 3),
+				Mathf.Lerp(lastPosition.z, cameraTarget.transform.position.z + offsetHeight * (float)System.Math.Sin(angle), smoothing * Time.deltaTime));
+			Debug.Log(prop + " " + xdiff + " " + zdiff + " " + cameraTarget.transform.position.x + " " + cameraTarget.transform.position.z + " " + newCorner.x + " " + newCorner.z + " " + nextCorner.x + " " + nextCorner.z + " " + lastPosition.x + " " + lastPosition.z);
+
+
+
+
+			/* attempt 2
+
 			if (newCorner != null) {
 				if (newCorner != lastCorner) {
 					lastCorner = newCorner;

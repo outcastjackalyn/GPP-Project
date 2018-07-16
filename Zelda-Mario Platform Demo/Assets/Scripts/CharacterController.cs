@@ -332,16 +332,20 @@ public class CharacterController : MonoBehaviour{
 	/// <summary>
 	/// Movement based in a 2.5D plane.
 	/// </summary>
-	void RailRelativeMovement(){
+	void RailRelativeMovement(Vector3 dir){
+		
+		//Vector3 forward = (
+
+
 		//converts control input vectors into camera facing vectors.
 		Transform cameraTransform = sceneCamera.transform;
 		//Forward vector relative to the camera along the x-z plane.
-		Vector3 forward = cameraTransform.TransformDirection(Vector3.forward);
-		forward.y = 0;
-		forward = forward.normalized;
+		//Vector3 forward = cameraTransform.TransformDirection(Vector3.forward);
+		dir.y = 0;
+		dir.Normalize();
 		//Right vector relative to the camera always orthogonal to the forward vector.
-		Vector3 right = new Vector3(forward.z, 0, -forward.x);
-		inputVec = inputHorizontal * right;
+		//Vector3 right = new Vector3(dir.z, 0, -dir.x);
+		inputVec = inputVertical * dir;
 	}
 
 
@@ -349,7 +353,8 @@ public class CharacterController : MonoBehaviour{
 	/// Rotate character towards movement direction.
 	/// </summary>
 	void RotateTowardsMovementDir(){
-		if(inputVec != Vector3.zero && !isStrafing){
+		if(inputVec != Vector3.zero && !isStrafing// && mode != Mode.SPLINE
+		){
 			transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(inputVec), Time.deltaTime * rotationSpeed);
 		}
 	}
@@ -364,7 +369,7 @@ public class CharacterController : MonoBehaviour{
 			if (mode == Mode.FOLLOW) {
 				CameraRelativeMovement ();
 			} else if (mode == Mode.SPLINE) {
-				RailRelativeMovement ();
+				RailRelativeMovement (sceneCamera.GetComponent<CameraController>().nextCorner - sceneCamera.GetComponent<CameraController>().lastCorner);
 			} else {
 				CameraRelativeMovement (); // this can be default
 			}
@@ -647,12 +652,9 @@ public class CharacterController : MonoBehaviour{
 
 	public IEnumerator _AlignToRail(Vector3 pos) {
 		//StartCoroutine (_LockMovement(0f));
-		while (pos.x - transform.position.x  > 0f || pos.z - transform.position.z > 0f) {
-			Vector3 flatPos = Vector3.MoveTowards (transform.position, pos, 0.5f * Time.deltaTime);
-			flatPos.y = 0f;
-			rb.MovePosition (flatPos);
-			yield return null;
-		}
+		pos -= new Vector3 (0f, 4f, 0f);
+		transform.position = pos;
+		yield return null;
 		//StartCoroutine (_UnlockMovement ());
 	}
 
@@ -700,6 +702,7 @@ public class CharacterController : MonoBehaviour{
 
 
 		if (c.gameObject.tag == "RailCorner") {
+			StartCoroutine (_AlignToRail (c.transform.position));
 			sceneCamera.gameObject.GetComponent<CameraController> ().newCorner = c.transform.position;
 			sceneCamera.gameObject.GetComponent<CameraController> ().mode = Mode.SPLINE;
 
@@ -708,7 +711,7 @@ public class CharacterController : MonoBehaviour{
 		}
 
 		if (c.gameObject.tag == "RailEnd") {
-			if (mode != Mode.FOLLOW) {
+			if (mode == Mode.FOLLOW) {
 				StartCoroutine (_AlignToRail (c.transform.position));
 			}
 			sceneCamera.gameObject.GetComponent<CameraController> ().newCorner = c.transform.position;
